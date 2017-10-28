@@ -18,7 +18,7 @@ To run the demo, simply execute `predict.py`.
 The code was tested on Ubuntu 16.04 with an NVIDIA GTX 1080 using PyTorch v.0.2.0_4.
 
 Example image:
-![Example image](https://raw.githubusercontent.com/ptrblck/prog_gans_pytorch_inference/master/example.png)
+![Example image](https://raw.githubusercontent.com/ptrblck/prog_gans_pytorch_inference/master/example.png =250x)
 
 
 ## Links
