@@ -14,6 +14,11 @@ Since I couldn't find any model converter between Theano/Lasagne and PyTorch, I 
 This repo does not provide the code for training the networks.
 
 To run the demo, simply execute `predict.py`.
+You can specify other weights with the `--weights` flag.
+
+The pretrained lasagne weights can be transferred to a PyTorch state dict using `transfer_weights.py`.
+
+To transfer other snapshots from the paper (other than CelebA), you have to modify the model architecture accordingly and use the corresponding weights.
 
 The code was tested on Ubuntu 16.04 with an NVIDIA GTX 1080 using PyTorch v.0.2.0_4.
 
