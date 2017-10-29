@@ -29,10 +29,10 @@ def scale_image(image):
 parser = argparse.ArgumentParser(description='Inference demo')
 parser.add_argument(
     '--weights',
-    default='',
+    default='100_celeb_hq_network-snapshot-010403.pth',
     type=str,
     metavar='PATH',
-    help='path to PyTorch state dict (default: none)')
+    help='path to PyTorch state dict')
 parser.add_argument('--cuda', dest='cuda', action='store_true')
 
 seed = 2809
