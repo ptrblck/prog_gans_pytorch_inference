@@ -4,11 +4,15 @@
 This work is based on the Theano/Lasagne implementation of
 Progressive Growing of GANs paper from tkarras:
 https://github.com/tkarras/progressive_growing_of_gans
+
+PyTorch Model definition
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from collections import OrderedDict
 
 
 class PixelNormLayer(nn.Module):
@@ -70,16 +74,8 @@ class Generator(nn.Module):
     def __init__(self):
         super(Generator, self).__init__()
 
-        self.in_layer = nn.Sequential(PixelNormLayer(),
-                                      nn.Conv2d(
-                                          512,
-                                          512,
-                                          kernel_size=4,
-                                          padding=3,
-                                          bias=False),
-                                      WScaleLayer(512))
-
-        self.upsampling_layers = nn.Sequential(
+        self.features = nn.Sequential(
+            NormConvBlock(512, 512, kernel_size=4, padding=3),
             NormConvBlock(512, 512, kernel_size=3, padding=1),
             NormUpscaleConvBlock(512, 512, kernel_size=3, padding=1),
             NormConvBlock(512, 512, kernel_size=3, padding=1),
@@ -98,17 +94,17 @@ class Generator(nn.Module):
             NormUpscaleConvBlock(32, 16, kernel_size=3, padding=1),
             NormConvBlock(16, 16, kernel_size=3, padding=1))
 
-        self.out_layer = nn.Sequential(PixelNormLayer(),
-                                       nn.Conv2d(
-                                           16,
+        self.output = nn.Sequential(OrderedDict([
+                        ('norm', PixelNormLayer()),
+                        ('conv', nn.Conv2d(16,
                                            3,
                                            kernel_size=1,
                                            padding=0,
-                                           bias=False),
-                                       WScaleLayer(3))
+                                           bias=False)),
+                        ('wscale', WScaleLayer(3))
+                    ]))
 
     def forward(self, x):
-        x = F.leaky_relu(self.in_layer(x), negative_slope=0.2)
-        x = self.upsampling_layers(x)
-        x = self.out_layer(x)
+        x = self.features(x)
+        x = self.output(x)
         return x

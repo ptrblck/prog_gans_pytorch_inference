@@ -6,6 +6,9 @@ Sample code for inference of Progressive Growing of GANs paper
 using a CelebA snapshot
 """
 
+from __future__ import print_function
+import argparse
+
 import numpy as np
 
 import torch
@@ -23,32 +26,64 @@ def scale_image(image):
     return image.astype(np.uint8)
 
 
+parser = argparse.ArgumentParser(description='Inference demo')
+parser.add_argument(
+    '--weights',
+    default='',
+    type=str,
+    metavar='PATH',
+    help='path to PyTorch state dict (default: none)')
+parser.add_argument('--cuda', dest='cuda', action='store_true')
+
 seed = 2809
 use_cuda = False
-weights_path = '100_celeb_hq_network-snapshot-010403.pth'
 
 torch.manual_seed(seed)
 if use_cuda:
     torch.cuda.manual_seed(seed)
 
-model = Generator()
-model.load_state_dict(torch.load(weights_path))
+def run(args):
+    global use_cuda
+    
+    print('Loading Generator')
+    model = Generator()
+    model.load_state_dict(torch.load(args.weights))
+    
+    # Generate latent vector
+    x = torch.randn(1, 512, 1, 1)
+    
+    if use_cuda:
+        model = model.cuda()
+        x = x.cuda()
+    
+    x = Variable(x, volatile=True)
+    
+    print('Executing forward pass')
+    images = model(x)
+    
+    if use_cuda:
+        images = images.cpu()
+    
+    images_np = images.data.numpy().transpose(0, 2, 3, 1)
+    image_np = scale_image(images_np[0, ...])
+    
+    print('Output')
+    plt.figure()
+    plt.imshow(image_np)
 
-# Generate latent vector
-x = torch.randn(1, 512, 1, 1)
 
-if use_cuda:
-    model = model.cuda()
-    x = x.cuda()
+def main():
+    global use_cuda
+    args = parser.parse_args()
 
-x = Variable(x, volatile=True)
-images = model(x)
+    if not args.weights:
+        print('No PyTorch state dict path privided. Exiting...')
+        return
+    
+    if args.cuda:
+        use_cuda = True
 
-if use_cuda:
-    images = images.cpu()
+    run(args)
 
-images_np = images.data.numpy().transpose(0, 2, 3, 1)
-image_np = scale_image(images_np[0, ...])
-
-plt.figure()
-plt.imshow(image_np)
+if __name__ == '__main__':
+    main()
