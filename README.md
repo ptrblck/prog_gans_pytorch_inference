@@ -9,22 +9,48 @@ Since some layers seemed to be missing in PyTorch, these were implemented as wel
 The network and the layers can be found in `model.py`.
 
 For the demo, a [100-celeb-hq-1024x1024-ours snapshot](https://drive.google.com/drive/folders/0B4qLcYyJmiz0bWJ5bHdKT0d6UXc) was used, which was made publicly available by the authors.
-Since I couldn't find any model converter between Theano/Lasagne and PyTorch, I used a quick and dirty script to transfer the weights between the models.
+Since I couldn't find any model converter between Theano/Lasagne and PyTorch, I used a quick and dirty script to transfer the weights between the models (`transfer_weights.py`).
 
 This repo does not provide the code for training the networks.
 
+### Simple inference
 To run the demo, simply execute `predict.py`.
 You can specify other weights with the `--weights` flag.
-
-The pretrained lasagne weights can be transferred to a PyTorch state dict using `transfer_weights.py`.
-
-To transfer other snapshots from the paper (other than CelebA), you have to modify the model architecture accordingly and use the corresponding weights.
-
-The code was tested on Ubuntu 16.04 with an NVIDIA GTX 1080 using PyTorch v.0.2.0_4.
 
 Example image:
 
 ![Example image](https://raw.githubusercontent.com/ptrblck/prog_gans_pytorch_inference/master/example_small.png)
+
+
+### Latent space interpolation
+To try the latent space interpolation, use `latent_interp.py`.
+All output images will be saved in `./interp`.
+
+The following flags are defined:
+
+  * `--weights` - path to pretrained PyTorch state dict
+  * `--output` - Directory for storing interpolated images
+  * `--batch_size` - batch size for `DataLoader`
+  * `--num_workers` - number of workers for `DataLoader`
+  * `--nb_latents` - number of frames to generate
+  * `--filter` - gaussian filter length for interpolating latent space
+  * `--seed` - random seed for numpy and PyTorch
+  * `--cuda` - use GPU 
+
+Example interpolation:
+
+![Example interpolation](https://raw.githubusercontent.com/ptrblck/prog_gans_pytorch_inference/master/example_interp.gif)
+
+### Transferring weights
+The pretrained lasagne weights can be transferred to a PyTorch state dict using `transfer_weights.py`.
+
+To transfer other snapshots from the paper (other than CelebA), you have to modify the model architecture accordingly and use the corresponding weights.
+
+### Environment
+The code was tested on Ubuntu 16.04 with an NVIDIA GTX 1080 using PyTorch v.0.2.0_4.
+`transfer_weights.py` needs Theano and Lasagne to load the pretrained weights.
+
+A single forward pass took approx. 0.031 seconds.
 
 
 ## Links

@@ -9,21 +9,14 @@ using a CelebA snapshot
 from __future__ import print_function
 import argparse
 
-import numpy as np
-
 import torch
 from torch.autograd import Variable
 
 from model import Generator
 
+from utils import scale_image
+
 import matplotlib.pyplot as plt
-
-
-def scale_image(image):
-    image -= image.min()
-    image /= image.max()
-    image *= 255
-    return image.astype(np.uint8)
 
 
 parser = argparse.ArgumentParser(description='Inference demo')
