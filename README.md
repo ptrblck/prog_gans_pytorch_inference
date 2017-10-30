@@ -48,6 +48,7 @@ To transfer other snapshots from the paper (other than CelebA), you have to modi
 
 ### Environment
 The code was tested on Ubuntu 16.04 with an NVIDIA GTX 1080 using PyTorch v.0.2.0_4.
+
 `transfer_weights.py` needs Theano and Lasagne to load the pretrained weights.
 
 A single forward pass took approx. 0.031 seconds.
