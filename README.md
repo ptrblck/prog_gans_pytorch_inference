@@ -26,20 +26,50 @@ Example image:
 To try the latent space interpolation, use `latent_interp.py`.
 All output images will be saved in `./interp`.
 
-The following flags are defined:
+You can chose between the "gaussian interpolation" introduced in the original paper
+and the "slerp interpolation" introduced by Tom White in his paper [Sampling Generative Networks](https://arxiv.org/abs/1609.04468v3)
+using the `--type` argument.
+
+Use `--filter` to change the gaussian filter size for the gaussian interpolation and `--interp` for the interpolation steps
+for the slerp interpolation.
+
+The following arguments are defined:
 
   * `--weights` - path to pretrained PyTorch state dict
   * `--output` - Directory for storing interpolated images
   * `--batch_size` - batch size for `DataLoader`
   * `--num_workers` - number of workers for `DataLoader`
-  * `--nb_latents` - number of frames to generate
-  * `--filter` - gaussian filter length for interpolating latent space
+  * `--type` {gauss, slerp} - interpolation type
+  * `--nb_latents` - number of latent vectors to generate
+  * `--filter` - gaussian filter length for interpolating latent space (gauss interpolation)
+  * `--interp` - interpolation length between each latent vector (slerp interpolation)
   * `--seed` - random seed for numpy and PyTorch
   * `--cuda` - use GPU 
+
+The total number of generated frames depends on the used interpolation technique.
+
+For gaussian interpolation the number of generated frames equals `nb_latents`, while the slerp interpolation generates `nb_latents * interp` frames.
 
 Example interpolation:
 
 ![Example interpolation](https://raw.githubusercontent.com/ptrblck/prog_gans_pytorch_inference/master/example_interp.gif)
+
+### Live latent space interpolation
+A live demo of the latent space interpolation using PyGame can be seen in `pygame_interp_demo.py`.
+
+Use the `--size` argument to change the output window size.
+
+The following arguments are defined:
+
+  * `--weights` - path to pretrained PyTorch state dict
+  * `--num_workers` - number of workers for `DataLoader`
+  * `--type` {gauss, slerp} - interpolation type
+  * `--nb_latents` - number of latent vectors to generate
+  * `--filter` - gaussian filter length for interpolating latent space (gauss interpolation)
+  * `--interp` - interpolation length between each latent vector (slerp interpolation)
+  * `--size` - PyGame window size
+  * `--seed` - random seed for numpy and PyTorch
+  * `--cuda` - use GPU 
 
 ### Transferring weights
 The pretrained lasagne weights can be transferred to a PyTorch state dict using `transfer_weights.py`.
@@ -49,7 +79,8 @@ To transfer other snapshots from the paper (other than CelebA), you have to modi
 ### Environment
 The code was tested on Ubuntu 16.04 with an NVIDIA GTX 1080 using PyTorch v.0.2.0_4.
 
-`transfer_weights.py` needs Theano and Lasagne to load the pretrained weights.
+  * `transfer_weights.py` needs Theano and Lasagne to load the pretrained weights.
+  * `pygame_interp_demo.py` needs PyGame to visualize the output
 
 A single forward pass took approx. 0.031 seconds.
 
