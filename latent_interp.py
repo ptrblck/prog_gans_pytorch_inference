@@ -20,6 +20,9 @@ from model import Generator
 from utils import LatentDataset, save_images
 
 
+interp_types = ['gauss', 'slerp']
+use_cuda = False
+
 parser = argparse.ArgumentParser(description='Interpolation demo')
 parser.add_argument(
     '--weights',
@@ -43,6 +46,13 @@ parser.add_argument(
     type=int,
     help='number of workers for DataLoader')
 parser.add_argument(
+    '--type',
+    default='gauss',
+    choices=interp_types,
+    help='interpolation types: ' +
+         ' | '.join(interp_types) +
+         ' (default: gauss)')
+parser.add_argument(
     '--nb_latents',
     default=10,
     type=int,
@@ -51,7 +61,12 @@ parser.add_argument(
     '--filter',
     default=2,
     type=int,
-    help='length of gaussian filter smoothing the latent vectors')
+    help='gauss filter length for latent vector smoothing (\'gaus\' interp)')
+parser.add_argument(
+    '--interp',
+    default=50,
+    type=int,
+    help='interpolation length between latents (\'slerp\' inter)')
 parser.add_argument(
     '--seed',
     default=187,
@@ -63,8 +78,6 @@ parser.add_argument(
     action='store_true',
     help='Use GPU for processing')
 
-
-use_cuda = False
 
 def run(args):
     global use_cuda
@@ -79,8 +92,11 @@ def run(args):
     else:
         pin_memory = False
     
-    # Generate latent vector
-    latent_dataset = LatentDataset(args.nb_latents, args.filter)
+    # Generate latent data
+    latent_dataset = LatentDataset(interp_type=args.type,
+                                   nb_latents=args.nb_latents,
+                                   filter_latents=args.filter,
+                                   nb_interp=args.interp)
     latent_loader = DataLoader(latent_dataset,
                                batch_size=args.batch_size,
                                num_workers=args.num_workers,
@@ -108,7 +124,7 @@ def main():
     args = parser.parse_args()
 
     if not args.weights:
-        print('No PyTorch state dict path privided. Exiting...')
+        print('No PyTorch state dict path provided. Exiting...')
         return
 
     if args.cuda:

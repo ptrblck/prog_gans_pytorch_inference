@@ -54,9 +54,42 @@ def get_gaussian_latents(nb_latents, filter_latents):
     return latents
 
 
+def slerp(val, low, high):
+    '''
+    original: Animating Rotation with Quaternion Curves, Ken Shoemake
+    
+    https://arxiv.org/abs/1609.04468
+    Code: https://github.com/soumith/dcgan.torch/issues/14, Tom White
+    '''
+    omega = np.arccos(np.dot(low/np.linalg.norm(low), high/np.linalg.norm(high)))
+    so = np.sin(omega)
+    return np.sin((1.0-val)*omega) / so * low + np.sin(val*omega)/so * high
+
+
+def get_slerp_interp(nb_latents, nb_interp):
+    low = np.random.randn(512)
+    
+    latent_interps = np.empty(shape=(0, 512), dtype=np.float32)
+    for _ in range(nb_latents):
+        high = np.random.randn(512)#low + np.random.randn(512) * 0.7
+        
+        interp_vals = np.linspace(1./nb_interp, 1, num=nb_interp)
+        latent_interp = np.array([slerp(v, low, high) for v in interp_vals],
+                                  dtype=np.float32)
+        
+        latent_interps = np.vstack((latent_interps, latent_interp))
+        low = high
+
+    return latent_interps[:, :, np.newaxis, np.newaxis]
+
+
 class LatentDataset(Dataset):
-    def __init__(self, nb_latents=1, filter_latents=1):
-        latents = get_gaussian_latents(nb_latents, filter_latents)
+    def __init__(self, interp_type='gauss', nb_latents=1, filter_latents=3,
+                 nb_interp=50):
+        if interp_type=='gauss':
+            latents = get_gaussian_latents(nb_latents, filter_latents)
+        elif interp_type=='slerp':
+            latents = get_slerp_interp(nb_latents, nb_interp)
         self.data = torch.from_numpy(latents)
 
     def __getitem__(self, index):
